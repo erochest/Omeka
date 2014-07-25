@@ -166,6 +166,13 @@ class Omeka_View extends Zend_View_Abstract
         $path = rtrim($path, '/') . '/';
         
         if (!in_array($path, $this->getScriptPaths())) {
+            fwrite(STDERR, "addScriptPath($path)\n");
+            ob_start();
+            debug_print_backtrace(0, 5);
+            $trace = ob_get_contents();
+            ob_end_clean();
+            fwrite(STDERR, $trace . "\n");
+            fwrite(STDERR, "\n");
             return parent::addScriptPath($path);
         }
     }
