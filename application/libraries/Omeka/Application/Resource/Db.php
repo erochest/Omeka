@@ -42,8 +42,17 @@ class Omeka_Application_Resource_Db extends Zend_Application_Resource_Db
         if (!isset($dbIni->host) || ($dbIni->host == 'XXXXXXX')) {
             throw new Zend_Config_Exception('Your Omeka database configuration file has not been set up properly.  Please edit the configuration and reload this page.');
         }
-        
+
         $connectionParams = $dbIni->toArray();
+        foreach ($connectionParams as $k => $v) {
+            if ($v[0] == '$') {
+                $v_tmp = getenv(substr($v, 1));
+                if ($v_tmp) {
+                    $connectionparams[$k] = $v_tmp;
+                }
+            }
+        }
+
         // dbname aliased to 'name' for backwards-compatibility.
         if (array_key_exists('name', $connectionParams)) {
             $connectionParams['dbname'] = $connectionParams['name'];
