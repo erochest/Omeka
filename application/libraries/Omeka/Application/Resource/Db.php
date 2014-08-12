@@ -36,25 +36,25 @@ class Omeka_Application_Resource_Db extends Zend_Application_Resource_Db
             throw new Zend_Config_Exception('Your Omeka database configuration file cannot be read by the application.');
         }
 
-        $dbIni = new Zend_Config_Ini($dbFile, 'database');
+        $dbIni = new Zend_Config_Ini($dbFile, 'database', array(
+            'allowModifications' => true
+        ));
 
         // Fail on improperly configured db.ini file
         if (!isset($dbIni->host) || ($dbIni->host == 'XXXXXXX')) {
             throw new Zend_Config_Exception('Your Omeka database configuration file has not been set up properly.  Please edit the configuration and reload this page.');
         }
 
-        $f = fopen('/tmp/envvars.log', 'w');
         $connectionParams = $dbIni->toArray();
         foreach ($connectionParams as $k => $v) {
             if ($v[0] == '$') {
                 $v_tmp = getenv(substr($v, 1));
-                fwrite($f, ">>> $k [$v] = '$v_tmp'\n");
                 if ($v_tmp) {
-                    $connectionparams[$k] = $v_tmp;
+                    $connectionParams[$k] = $v_tmp;
+                    $dbIni->$k = $v_tmp;
                 }
             }
         }
-        fclose($f);
 
         // dbname aliased to 'name' for backwards-compatibility.
         if (array_key_exists('name', $connectionParams)) {
