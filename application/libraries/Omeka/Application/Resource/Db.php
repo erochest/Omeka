@@ -41,7 +41,9 @@ class Omeka_Application_Resource_Db extends Zend_Application_Resource_Db
             throw new Zend_Config_Exception('Your Omeka database configuration file cannot be read by the application.');
         }
 
-        $dbIni = new Zend_Config_Ini($dbFile, 'database');
+        $dbIni = new Zend_Config_Ini($dbFile, 'database', array(
+            'allowModifications' => true
+        ));
 
         // Fail on improperly configured db.ini file
         if (!isset($dbIni->host) || ($dbIni->host == 'XXXXXXX')) {
