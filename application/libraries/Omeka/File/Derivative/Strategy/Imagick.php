@@ -13,8 +13,7 @@
  *
  * @package Omeka\File\Derivative\Strategy
  */
-class Omeka_File_Derivative_Strategy_Imagick
-    extends Omeka_File_Derivative_AbstractStrategy
+class Omeka_File_Derivative_Strategy_Imagick extends Omeka_File_Derivative_AbstractStrategy
 {
     /**
      * Check for the imagick extension at creation.
@@ -39,6 +38,10 @@ class Omeka_File_Derivative_Strategy_Imagick
         } catch (ImagickException $e) {
             _log("Imagick failed to open the file. Details:\n$e", Zend_Log::ERR);
             return false;
+        }
+
+        if ($this->getOption('autoOrient', false)) {
+            $this->_autoOrient($imagick);
         }
 
         $origX = $imagick->getImageWidth();
@@ -135,6 +138,41 @@ class Omeka_File_Derivative_Strategy_Imagick
             case 'east':
             default:
                 return (int) (($resizedY - $sizeConstraint) / 2);
+        }
+    }
+
+    protected function _autoOrient($imagick)
+    {
+        $orientation = $imagick->getImageOrientation();
+        $white = new ImagickPixel('#fff');
+        switch ($orientation) {
+            case Imagick::ORIENTATION_RIGHTTOP:
+                $imagick->rotateImage($white, 90);
+                break;
+            case Imagick::ORIENTATION_BOTTOMRIGHT:
+                $imagick->rotateImage($white, 180);
+                break;
+            case Imagick::ORIENTATION_LEFTBOTTOM:
+                $imagick->rotateImage($white, 270);
+                break;
+            case Imagick::ORIENTATION_TOPRIGHT:
+                $imagick->flopImage();
+                break;
+            case Imagick::ORIENTATION_RIGHTBOTTOM:
+                $imagick->flopImage();
+                $imagick->rotateImage($white, 90);
+                break;
+            case Imagick::ORIENTATION_BOTTOMLEFT:
+                $imagick->flopImage();
+                $imagick->rotateImage($white, 180);
+                break;
+            case Imagick::ORIENTATION_LEFTTOP:
+                $imagick->flopImage();
+                $imagick->rotateImage($white, 270);
+                break;
+            case Imagick::ORIENTATION_TOPLEFT:
+            default:
+                break;
         }
     }
 }
